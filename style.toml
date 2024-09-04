@@ -1,0 +1,21 @@
+max_width = 100
+hard_tabs = false
+tab_spaces = 4
+fn_brace_style = "SameLineWhere"
+imports_granularity = "Item"
+group_imports = "StdExternalCrate"
+format_comments = true
+align_args = true
+trailing_comma = "Vertical"
+match_arm_blocks = "Consistent"
+vertical_where_clauses = true
+where_single_line = true
+chain_one_line_max = 4
+use_small_heuristics = "Max"
+newline_style = "Auto"
+wrap_comments = true
+format_macro_matchers = true
+normalize_doc_attributes = true
+struct_field_align_threshold = 20
+struct_lit_single_line = true
+
