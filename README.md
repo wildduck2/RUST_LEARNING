@@ -55,4 +55,17 @@
 
 By following this roadmap step-by-step, a beginner Rust developer can progressively build up the skills and knowledge needed to implement a full-featured CSS language server. Each phase builds on the last, from Rust basics through protocol understanding, to implementing real editor features, and finally to polishing and publishing a professional-grade tool.
 
-**Sources:** Tower-LSP crate and docs ([GitHub - ebkalderon/tower-lsp: Language Server Protocol implementation written in Rust](https://github.com/ebkalderon/tower-lsp#:~:text=This%20library%20%28%60tower,It%20consists%20of%20three%20parts)); LSP official spec ([Official page for Language Server Protocol](https://microsoft.github.io/language-server-protocol#:~:text=The%20Language%20Server%20Protocol%20,copy%20of%20the%20source%20code)) ([Official page for Language Server Protocol](https://microsoft.github.io/language-server-protocol#:~:text=The%20protocol%20defines%20the%20format,store%20information%20about%20programming%20artifacts)); Rust forum and examples ([Rust tutorial on writing a lsp server? - The Rust Programming Language Forum](https://users.rust-lang.org/t/rust-tutorial-on-writing-a-lsp-server/75570#:~:text=building%20a%20LSP%20server%20is,helps%20with%20the%20all%20around)) ([Rust tutorial on writing a lsp server? - The Rust Programming Language Forum](https://users.rust-lang.org/t/rust-tutorial-on-writing-a-lsp-server/75570#:~:text=I%20don%27t%20know%20specifically%20of,lsp)); cssparser crate docs ([cssparser - Rust](https://docs.rs/cssparser/#:~:text=Expand%20description)); community language server experiences ([Postgres Language Server | Hacker News](https://news.ycombinator.com/item?id=37020610#:~:text=This%20attempt%20is%20different%20because,the%20rapid%20development%20of%20Postgres)).
+**Sources:** Tower-LSP crate and docs ([GitHub - ebkalderon/tower-lsp: Language Server Protocol
+implementation written in
+Rust](https://github.com/ebkalderon/tower-lsp#:~:text=This%20library%20%28%60tower,It%20consists%20of%20three%20parts));
+LSP official spec ([Official page for Language Server
+Protocol](https://microsoft.github.io/language-server-protocol#:~:text=The%20Language%20Server%20Protocol%20,copy%20of%20the%20source%20code))
+([Official page for Language Server
+Protocol](https://microsoft.github.io/language-server-protocol#:~:text=The%20protocol%20defines%20the%20format,store%20information%20about%20programming%20artifacts));
+Rust forum and examples ([Rust tutorial on writing a lsp server? - The Rust Programming Language
+Forum](https://users.rust-lang.org/t/rust-tutorial-on-writing-a-lsp-server/75570#:~:text=building%20a%20LSP%20server%20is,helps%20with%20the%20all%20around))
+([Rust tutorial on writing a lsp server? - The Rust Programming Language
+Forum](https://users.rust-lang.org/t/rust-tutorial-on-writing-a-lsp-server/75570#:~:text=I%20don%27t%20know%20specifically%20of,lsp));
+cssparser crate docs ([cssparser - Rust](https://docs.rs/cssparser/#:~:text=Expand%20description));
+community language server experiences ([Postgres Language Server | Hacker
+News](https://news.ycombinator.com/item?id=37020610#:~:text=This%20attempt%20is%20different%20because,the%20rapid%20development%20of%20Postgres)); [Rust API Guidelines](https://rust-lang.github.io/api-guidelines/#rust-api-guidelines)
