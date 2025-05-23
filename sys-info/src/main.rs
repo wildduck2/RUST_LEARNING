@@ -1,90 +1,101 @@
-use std::{thread, time};
+mod cpu;
+mod ram;
+mod utils;
+use core::time;
+use std::{path::Path, thread};
 
-use serde_json::from_str;
 use sysinfo::System;
-use tabled::{Table, Tabled};
-
-#[derive(Debug, Tabled)]
-struct TableInfo<'a> {
-  name: &'a str,
-  total: String,
-  used: String,
-  free: String,
-}
-
-impl<'a> TableInfo<'a> {
-  fn new(name: &str, total: u64, used: u64) -> TableInfo {
-    TableInfo {
-      name,
-      total: TableInfo::get_gb(total),
-      used: TableInfo::get_gb(used),
-      free: TableInfo::get_gb(total - used),
-    }
-  }
-
-  fn get_gb(bytes: u64) -> String {
-    format!("{}GB", bytes / 1024 / 1000 / 1000)
-  }
-}
 
 fn main() {
-  let mut sys = System::new_all();
+    let mut sys = System::new_all();
 
-  // let swap = TableInfo::new("Swap", sys.total_swap(), sys.used_swap());
-  // let memory = TableInfo::new("Memory", sys.total_memory(), sys.used_memory());
-  //
-  // let table = Table::new([swap, memory]); // pass a slice or Vec of Tabled items
-  // println!("{}", table);
+    loop {
+        sys.refresh_all();
+        // Clear the screen
+        print!("\x1B[2J\x1B[1;1H");
 
-  // CPU print information.
+        // CPU print information.
+        cpu::get_cpu_info(&sys);
+        // RAM print information.
+        ram::get_swap_info(&sys);
 
-  loop {
-    sys.refresh_all();
-    print!("\x1B[2J\x1B[1;1H");
+        get_process_info(&sys);
 
-    println!("        -- CPU Usage --");
+        // Sleep the thread for a bit.
+        thread::sleep(time::Duration::from_millis(1000));
+    }
+}
 
-    // Adjust width of progress bar and columns
-    let bar_width = 20;
+pub fn get_process_info(sys: &System) {
+    // Table header
+    println!(
+        "  +{:-<6}+{:-<20}+{:-<9}+{:-<12}+{:-<12}+{:-<8}+{:-<40}+",
+        "", "", "", "", "", "", ""
+    );
+    println!(
+        "  | {:<6} | {:<18} | {:>7} | {:>10} | {:>10} | {:<6} | {:<38} |",
+        "PID", "Name", "CPU (%)", "Memory", "Virtual", "Status", "Path"
+    );
+    println!(
+        "  +{:-<6}+{:-<20}+{:-<9}+{:-<12}+{:-<12}+{:-<8}+{:-<40}+",
+        "", "", "", "", "", "", ""
+    );
 
-    // print!("+{:-<10}+{:-<24}+{:-<9}+", "", "", "");
-    print!("  +{:-<10}+{:-<24}+{:-<9}+\n", "", "", "");
-    print!("  | {:<8} | {:<22} | {:>7} |\n", "CPU", "Usage", "%");
-    print!("  +{:-<10}+{:-<24}+{:-<9}+\n", "", "", "");
+    // Sort processes by CPU usage descending
+    let mut processes: Vec<_> = sys.processes().iter().collect();
+    processes.sort_by(|a, b| b.1.cpu_usage().partial_cmp(&a.1.cpu_usage()).unwrap());
 
-    for (i, cpu) in sys.cpus().iter().enumerate() {
-      let usage = cpu.cpu_usage();
-      let bar = render_bar(usage, bar_width);
-      print!(
-        "  | {:<8} | {:<22} | {:>7.1} |\n",
-        format!("Core {}", i),
-        bar,
-        usage
-      );
+    for (pid, process) in processes.iter().take(15) {
+        let cpu_usage = process.cpu_usage() / 10.0;
+        let mem = format_bytes(process.memory() * 1024); // sysinfo returns KB, convert to bytes
+        let status = format!("{:?}", process.status());
+        let name = truncate(process.name().to_str().unwrap(), 18);
+        let path = process.exe().unwrap_or(Path::new(""));
+
+        println!(
+            "  | {:<6} | {:<18} | {:>7.1} | {:>10} | {:<6} | {:<38} |",
+            pid,
+            name,
+            cpu_usage,
+            mem,
+            status,
+            truncate(path.to_str().unwrap(), 38)
+        );
     }
 
-    print!("  +{:-<10}+{:-<24}+{:-<9}+\n", "", "", "");
+    println!(
+        "  +{:-<6}+{:-<20}+{:-<9}+{:-<12}+{:-<8}+{:-<40}+",
+        "", "", "", "", "", ""
+    );
 
-    thread::sleep(time::Duration::from_millis(1000));
-  }
+    // Summary bars (aggregate)
+    let total_cpu = sys.global_cpu_usage();
+    let total_mem = sys.used_memory() as f64 * 1024.0;
+    let total_swap = sys.used_swap() as f64 * 1024.0;
+
+    println!("Total CPU Usage: {:.1}%", total_cpu);
+    println!("Total Memory Usage: {}", format_bytes(total_mem as u64));
+    println!("Total Swap Usage: {}", format_bytes(total_swap as u64));
 }
-fn render_bar(usage: f32, width: usize) -> String {
-  let filled_len = ((usage / 100.0) * width as f32).round() as usize;
-  let empty_len = width - filled_len;
 
-  let filled = "▰".repeat(filled_len);
-  let empty = "▱".repeat(empty_len);
-
-  let color = usage_color(usage);
-  let reset = "\x1b[0m";
-
-  format!("{}[{}{}]{}", color, filled, empty, reset)
+fn truncate(s: &str, max_len: usize) -> String {
+    if s.len() <= max_len {
+        s.to_string()
+    } else {
+        format!("{}...", &s[..max_len.saturating_sub(3)])
+    }
 }
-fn usage_color(usage: f32) -> &'static str {
-  match usage {
-    u if u >= 75.0 => "\x1b[31m", // Red
-    u if u >= 50.0 => "\x1b[33m", // Yellow
-    u if u >= 25.0 => "\x1b[32m", // Green
-    _ => "\x1b[34m",              // Blue
-  }
+
+fn format_bytes(bytes: u64) -> String {
+    const KB: f64 = 1024.0;
+    const MB: f64 = KB * 1000.0; // 1,048,576
+
+    let b = bytes as f64;
+    if b >= MB {
+        format!("{:.2} MB", b / MB / 1000.0)
+    } else if b >= KB {
+        format!("{:.2} KB", b / KB)
+    } else {
+        format!("{} B", bytes)
+    }
 }
