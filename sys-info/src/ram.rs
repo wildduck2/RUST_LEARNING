@@ -24,7 +24,7 @@ impl<'a> TableInfo<'a> {
   }
 }
 
-pub fn get_swap_info(sys: &System) {
+pub fn get_memory_info(sys: &System) {
   let swap = TableInfo::new("Swap", sys.total_swap(), sys.used_swap());
   let memory = TableInfo::new("Memory", sys.total_memory(), sys.used_memory());
 
