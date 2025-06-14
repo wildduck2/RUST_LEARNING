@@ -1,16 +1,48 @@
+use std::collections::HashSet;
+
 pub struct Solution;
 impl Solution {
   pub fn is_valid_sudoku(board: Vec<Vec<char>>) -> bool {
-    for row in board {
-      for (idx, chunk) in row.iter().enumerate() {
-        if chunk == &'.' {
-          print!("{:?} ", chunk);
+    let mut rows: Vec<HashSet<char>> = vec![HashSet::new(); 9];
+    let mut columns: Vec<HashSet<char>> = vec![HashSet::new(); 9];
+    let mut boxes: Vec<HashSet<char>> = vec![HashSet::new(); 9];
+
+    for i in 0..9 {
+      for j in 0..9 {
+        let chunk = board[i][j];
+
+        if chunk == '.' {
           continue;
         }
-        print!("{:?} ", chunk);
+
+        if !rows[i].insert(chunk) {
+          return false;
+        }
+
+        if !columns[j].insert(chunk) {
+          return false;
+        }
+
+        /*
+         * NOTE: The index of the 3x3 box is:
+         * i / 3 * 3 + j / 3
+         * where i is the row index and j is the column index
+         * This is because we can divide the board into 3x3 boxes
+         * 0 1 2
+         * 3 4 5
+         * 6 7 8
+         * -------
+         * 0 / 3 * 3 + 0 / 3 = 0
+         * 1 / 3 * 3 + 1 / 3 = 1
+         * ...etc
+         */
+
+        let bbox = (i / 3) * 3 + (j / 3);
+        if !boxes[bbox].insert(chunk) {
+          return false;
+        }
       }
     }
-
     true
   }
 }
